@@ -1,0 +1,129 @@
+EXPERIMENT 5
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#define ROWS 10
+#define SEATS 7
+
+struct Seat {
+    int seat_no;
+    int booked; // 0 = free, 1 = booked
+    struct Seat *next, *prev;
+};
+
+struct Seat *rows[ROWS];
+
+// Function to create seat node
+struct Seat* createSeat(int seat_no) {
+    struct Seat *newSeat = (struct Seat*)malloc(sizeof(struct Seat));
+    newSeat->seat_no = seat_no;
+    newSeat->booked = 0;
+    newSeat->next = newSeat->prev = NULL;
+    return newSeat;
+}
+
+// Initialize rows
+void initialize() {
+    for (int i = 0; i < ROWS; i++) {
+        struct Seat *head = NULL, *tail = NULL;
+        for (int j = 1; j <= SEATS; j++) {
+            struct Seat *newSeat = createSeat(j);
+            if (head == NULL)
+                head = tail = newSeat;
+            else {
+                tail->next = newSeat;
+                newSeat->prev = tail;
+                tail = newSeat;
+            }
+        }
+        rows[i] = head;
+    }
+}
+
+// Display all seats
+void display() {
+    struct Seat *temp;
+    for (int i = 0; i < ROWS; i++) {
+        printf("Row %2d: ", i + 1);
+        temp = rows[i];
+        while (temp != NULL) {
+            printf("%d(%d) ", temp->seat_no, temp->booked);
+            temp = temp->next;
+        }
+        printf("\n");
+    }
+}
+
+// Book a seat
+void bookSeat(int row, int seat) {
+    struct Seat *temp = rows[row - 1];
+    while (temp != NULL && temp->seat_no != seat)
+        temp = temp->next;
+    if (temp == NULL)
+        printf("Invalid seat!\n");
+    else if (temp->booked)
+        printf("Seat already booked!\n");
+    else {
+        temp->booked = 1;
+        printf("Seat %d in Row %d booked.\n", seat, row);
+    }
+}
+
+// Cancel a seat
+void cancelSeat(int row, int seat) {
+    struct Seat *temp = rows[row - 1];
+    while (temp != NULL && temp->seat_no != seat)
+        temp = temp->next;
+    if (temp == NULL)
+        printf("Invalid seat!\n");
+    else if (!temp->booked)
+        printf("Seat not booked!\n");
+    else {
+        temp->booked = 0;
+        printf("Seat %d in Row %d cancelled.\n", seat, row);
+    }
+}
+
+int main() {
+    int choice, row, seat;
+    initialize();
+
+    // Random booked seats
+    rows[0]->booked = 1;
+    rows[3]->next->booked = 1;
+    rows[5]->next->next->booked = 1;
+
+    while (1) {
+        printf("\n--- CINEMAX THEATRE ---\n");
+        printf("1. Display Seats\n");
+        printf("2. Book Seat\n");
+        printf("3. Cancel Booking\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                display();
+                break;
+            case 2:
+                printf("Enter Row and Seat to Book: ");
+                scanf("%d %d", &row, &seat);
+                bookSeat(row, seat);
+                break;
+            case 3:
+                printf("Enter Row and Seat to Cancel: ");
+                scanf("%d %d", &row, &seat);
+                cancelSeat(row, seat);
+                break;
+            case 4:
+                return 0;
+            default:
+                printf("Invalid choice!\n");
+        }
+    }
+    return 0;
+}
