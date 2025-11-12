@@ -1,0 +1,99 @@
+EXPERIMENT 6
+
+
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+
+#define SIZE 100
+
+char stack[SIZE];
+int top = -1;
+
+void push(char c) { stack[++top] = c; }
+char pop() { return stack[top--]; }
+char peek() { return stack[top]; }
+
+int precedence(char op) {
+    if (op == '*' || op == '/') return 2;
+    if (op == '+' || op == '-') return 1;
+    return 0;
+}
+
+// Infix to Postfix
+void infixToPostfix(char infix[], char postfix[]) {
+    int i, j = 0;
+    char c;
+    top = -1; // reset stack
+    for (i = 0; infix[i] != '\0'; i++) {
+        c = infix[i];
+        if (isalnum(c))
+            postfix[j++] = c;
+        else if (c == '(')
+            push(c);
+        else if (c == ')') {
+            while (top != -1 && peek() != '(')
+                postfix[j++] = pop();
+            pop(); // remove '('
+        } else {
+            while (top != -1 && precedence(peek()) >= precedence(c))
+                postfix[j++] = pop();
+            push(c);
+        }
+    }
+    while (top != -1)
+        postfix[j++] = pop();
+    postfix[j] = '\0';
+}
+
+// Evaluate Postfix
+int eval(char postfix[]) {
+    int s[SIZE];
+    int t = -1;
+    int a, b;
+    for (int i = 0; postfix[i] != '\0'; i++) {
+        if (isdigit(postfix[i])) {
+            s[++t] = postfix[i] - '0';
+        } else {
+            b = s[t--];
+            a = s[t--];
+            switch (postfix[i]) {
+                case '+':
+                    s[++t] = a + b;
+                    break;
+                case '-':
+                    s[++t] = a - b;
+                    break;
+                case '*':
+                    s[++t] = a * b;
+                    break;
+                case '/':
+                    s[++t] = a / b;
+                    break;
+                default:
+                    printf("Invalid operator: %c\n", postfix[i]);
+                    return 0;
+            }
+        }
+    }
+    return s[t];
+}
+
+int main() {
+    char infix[SIZE], postfix[SIZE];
+
+    printf("Enter infix expression: ");
+    fgets(infix, SIZE, stdin);
+    infix[strcspn(infix, "\n")] = '\0'; // remove newline
+
+    infixToPostfix(infix, postfix);
+    printf("Postfix Expression: %s\n", postfix);
+
+    printf("Enter postfix expression (digits only): ");
+    fgets(postfix, SIZE, stdin);
+    postfix[strcspn(postfix, "\n")] = '\0'; // remove newline
+
+    printf("Result = %d\n", eval(postfix));
+
+    return 0;
+}
