@@ -1,24 +1,15 @@
 #include <stdio.h>
-#include <string.h>
 #include <ctype.h>
+#include <string.h>
 
 #define SIZE 100
 
-// ---------- Stack for characters ----------
 char stack[SIZE];
 int top = -1;
 
-void push(char c) {
-    stack[++top] = c;
-}
-
-char pop() {
-    return stack[top--];
-}
-
-char peek() {
-    return stack[top];
-}
+void push(char c) { stack[++top] = c; }
+char pop() { return stack[top--]; }
+char peek() { return stack[top]; }
 
 int precedence(char op) {
     if (op == '*' || op == '/') return 2;
@@ -26,41 +17,22 @@ int precedence(char op) {
     return 0;
 }
 
-// ---------- Check for Balanced Parentheses ----------
-int isBalanced(char exp[]) {
-    int i;
-    top = -1;
-    for (i = 0; i < strlen(exp); i++) {
-        char ch = exp[i];
-        if (ch == '(' || ch == '{' || ch == '[')
-            push(ch);
-        else if (ch == ')' || ch == '}' || ch == ']') {
-            if (top == -1) return 0;
-            char temp = pop();
-            if ((ch == ')' && temp != '(') ||
-                (ch == '}' && temp != '{') ||
-                (ch == ']' && temp != '['))
-                return 0;
-        }
-    }
-    return (top == -1);
-}
-
-// ---------- Infix to Postfix Conversion ----------
+// Infix to Postfix
 void infixToPostfix(char infix[], char postfix[]) {
     int i, j = 0;
-    top = -1;
+    char c;
+    top = -1; // reset stack
     for (i = 0; infix[i] != '\0'; i++) {
-        char c = infix[i];
-        if (isalnum(c)) {
+        c = infix[i];
+        if (isalnum(c))
             postfix[j++] = c;
-        } else if (c == '(') {
+        else if (c == '(')
             push(c);
-        } else if (c == ')') {
+        else if (c == ')') {
             while (top != -1 && peek() != '(')
                 postfix[j++] = pop();
-            pop();
-        } else if (c == '+' || c == '-' || c == '*' || c == '/') {
+            pop(); // remove '('
+        } else {
             while (top != -1 && precedence(peek()) >= precedence(c))
                 postfix[j++] = pop();
             push(c);
@@ -71,64 +43,54 @@ void infixToPostfix(char infix[], char postfix[]) {
     postfix[j] = '\0';
 }
 
-// ---------- Evaluate Postfix Expression ----------
-int evaluatePostfix(char postfix[]) {
+// Evaluate Postfix
+int eval(char postfix[]) {
     int s[SIZE];
     int t = -1;
-    int i, a, b;
-    for (i = 0; postfix[i] != '\0'; i++) {
-        char c = postfix[i];
-        if (isdigit(c))
-            s[++t] = c - '0';
-        else {
+    int a, b;
+    for (int i = 0; postfix[i] != '\0'; i++) {
+        if (isdigit(postfix[i])) {
+            s[++t] = postfix[i] - '0';
+        } else {
             b = s[t--];
             a = s[t--];
-            switch (c) {
-                case '+': s[++t] = a + b; break;
-                case '-': s[++t] = a - b; break;
-                case '*': s[++t] = a * b; break;
-                case '/': s[++t] = a / b; break;
+            switch (postfix[i]) {
+                case '+':
+                    s[++t] = a + b;
+                    break;
+                case '-':
+                    s[++t] = a - b;
+                    break;
+                case '*':
+                    s[++t] = a * b;
+                    break;
+                case '/':
+                    s[++t] = a / b;
+                    break;
+                default:
+                    printf("Invalid operator: %c\n", postfix[i]);
+                    return 0;
             }
         }
     }
     return s[t];
 }
 
-// ---------- Main ----------
 int main() {
-    char exp[SIZE], postfix[SIZE];
-    int ch;
+    char infix[SIZE], postfix[SIZE];
 
-    printf("1. Check Balanced Parentheses\n");
-    printf("2. Infix to Postfix & Evaluate\n");
-    printf("Enter your choice: ");
-    scanf("%d", &ch);
-    getchar(); // clear input buffer
+    printf("Enter infix expression: ");
+    fgets(infix, SIZE, stdin);
+    infix[strcspn(infix, "\n")] = '\0'; // remove newline
 
-    if (ch == 1) {
-        printf("Enter expression: ");
-        gets(exp);
-        if (isBalanced(exp))
-            printf("Expression is Well Parenthesized.\n");
-        else
-            printf("Expression is NOT Well Parenthesized.\n");
-    } 
-    else if (ch == 2) {
-        printf("Enter infix expression: ");
-        gets(exp);
+    infixToPostfix(infix, postfix);
+    printf("Postfix Expression: %s\n", postfix);
 
-        infixToPostfix(exp, postfix);
-        printf("Postfix Expression: %s\n", postfix);
+    printf("Enter postfix expression (digits only): ");
+    fgets(postfix, SIZE, stdin);
+    postfix[strcspn(postfix, "\n")] = '\0'; // remove newline
 
-        printf("Enter postfix expression (digits only): ");
-        gets(postfix);
-
-        int result = evaluatePostfix(postfix);
-        printf("Result = %d\n", result);
-    } 
-    else {
-        printf("Invalid choice.\n");
-    }
+    printf("Result = %d\n", eval(postfix));
 
     return 0;
 }
