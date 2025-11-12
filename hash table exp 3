@@ -1,0 +1,95 @@
+EXPERIMENT 3
+
+
+#include <stdio.h>
+#include <string.h>
+
+#define SIZE 10
+
+struct Client {
+    char name[30];
+    long phone;
+};
+
+struct Client hashTable[SIZE];
+
+int hash(long key) {
+    return key % SIZE;
+}
+
+int hash2(long key) {
+    return 7 - (key % 7);
+}
+
+// Linear Probing
+void insertLinear(char n[], long p) {
+    int index = hash(p);
+    while (hashTable[index].phone != 0)
+        index = (index + 1) % SIZE;
+    strcpy(hashTable[index].name, n);
+    hashTable[index].phone = p;
+}
+
+// Quadratic Probing
+void insertQuadratic(char n[], long p) {
+    int index = hash(p);
+    int i = 0;
+    while (hashTable[(index + i * i) % SIZE].phone != 0)
+        i++;
+    index = (index + i * i) % SIZE;
+    strcpy(hashTable[index].name, n);
+    hashTable[index].phone = p;
+}
+
+// Double Hashing
+void insertDouble(char n[], long p) {
+    int index = hash(p);
+    int step = hash2(p);
+    while (hashTable[index].phone != 0)
+        index = (index + step) % SIZE;
+    strcpy(hashTable[index].name, n);
+    hashTable[index].phone = p;
+}
+
+// Display hash table
+void display() {
+    printf("\nHash Table:\n");
+    for (int i = 0; i < SIZE; i++) {
+        if (hashTable[i].phone == 0)
+            printf("%d : \n", i);
+        else
+            printf("%d : %s - %ld\n", i, hashTable[i].name, hashTable[i].phone);
+    }
+}
+
+int main() {
+    int n, choice;
+    char nme[30];
+    long ph;
+
+    for (int i = 0; i < SIZE; i++)
+        hashTable[i].phone = 0; // initialize as empty
+
+    printf("Enter number of clients: ");
+    scanf("%d", &n);
+
+    printf("\n1. Linear Probing\n2. Quadratic Probing\n3. Double Hashing\nEnter choice: ");
+    scanf("%d", &choice);
+
+    for (int i = 0; i < n; i++) {
+        printf("\nEnter name: ");
+        scanf("%s", nme);
+        printf("Enter phone number: ");
+        scanf("%ld", &ph);
+
+        switch (choice) {
+            case 1: insertLinear(nme, ph); break;
+            case 2: insertQuadratic(nme, ph); break;
+            case 3: insertDouble(nme, ph); break;
+            default: printf("Invalid choice!\n"); return 0;
+        }
+    }
+
+    display();
+    return 0;
+}
