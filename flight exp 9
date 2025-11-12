@@ -37,7 +37,7 @@ void addFlight() {
     scanf("%s", src);
     printf("Enter destination city: ");
     scanf("%s", dest);
-    printf("Enter cost (time/fuel): ");
+    printf("Enter cost : ");
     scanf("%d", &cost);
 
     int i = findCity(src);
