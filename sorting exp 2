@@ -1,0 +1,70 @@
+EXPERIMENT 2
+
+
+#include <stdio.h>
+
+void selectionSort(int a[], int n) {
+    int temp;
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = i + 1; j < n; j++) {
+            if (a[i] > a[j]) {
+                temp = a[i];
+                a[i] = a[j];
+                a[j] = temp;
+            }
+        }
+    }
+}
+
+void bubbleSort(int a[], int n) {
+    int temp;
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (a[j] > a[j + 1]) {
+                temp = a[j];
+                a[j] = a[j + 1];
+                a[j + 1] = temp;
+            }
+        }
+    }
+}
+
+int main() {
+    int marks[100], n, choice;
+
+    printf("Enter number of students: ");
+    scanf("%d", &n);
+
+    printf("Enter marks of students:\n");
+    for (int i = 0; i < n; i++)
+        scanf("%d", &marks[i]);
+
+    printf("\n1. Selection Sort\n2. Bubble Sort\nEnter choice: ");
+    scanf("%d", &choice);
+
+    switch (choice) {
+        case 1:
+            selectionSort(marks, n);
+            printf("\nSorted using Selection Sort:\n");
+            break;
+
+        case 2:
+            bubbleSort(marks, n);
+            printf("\nSorted using Bubble Sort:\n");
+            break;
+
+        default:
+            printf("Invalid choice!");
+            return 0;
+    }
+
+    for (int i = 0; i < n; i++)
+        printf("%d ", marks[i]);
+
+    printf("\n\nTop Five Scores:\n");
+    int count = (n < 5) ? n : 5;
+    for (int i = n - 1; i >= n - count; i--)
+        printf("%d\n", marks[i]);
+
+    return 0;
+}
